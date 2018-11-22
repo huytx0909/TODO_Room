@@ -79,9 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
                 taskArrayList.add(new Task(description, shortTime));
-
                 mainListView = findViewById(R.id.list_view_Main);
-
                 adapter = new TaskAdapter(taskArrayList, MainActivity.this);
                 mainListView.setAdapter(adapter);
                 mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
