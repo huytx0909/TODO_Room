@@ -7,4 +7,6 @@
     <string name="CalendarButton">Go to calendar</string>
     <string name="text_ToDay" >Today is</string>
     <string name="addButton">Add</string>
+    <string name="button_Delete">Delete</string>
+    <string name="button_Edit">Edit</string>
 </resources>

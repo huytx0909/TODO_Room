@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -37,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private String newDescription;
     private String description;
     private String time;
-    private ListView listViewTaskMain;
     ArrayList<Task> taskArrayList = new ArrayList<>();
     TaskAdapter adapter;
     public static String CURRENT_DATE_FORMATTED;
@@ -57,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         CURRENT_DATE_FORMATTED = df.format(date);
 
-        listViewTaskMain = findViewById(R.id.list_view_Main);
+        mainListView = findViewById(R.id.list_view_Main);
 
         TextView theDate = findViewById(R.id.Main_Date);
         theDate.setText(CURRENT_DATE_FORMATTED);
@@ -78,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
             while (cursor.moveToNext()) {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+                shortTime = time.substring(11);
                 taskArrayList.add(new Task(description, shortTime));
                 mainListView = findViewById(R.id.list_view_Main);
                 adapter = new TaskAdapter(taskArrayList, MainActivity.this);
