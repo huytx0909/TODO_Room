@@ -15,6 +15,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_TIME = "appointedTime";
+    public static final String COLUMN_STATUS = "status";
 
 
     public DatabaseHelper(Context context) {
@@ -29,7 +30,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String formattedDate = df.format(date);
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT, appointedTime TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT, appointedTime TEXT, " +
+                "status INTEGER default 0)");
         db.execSQL("insert into tasks(description, appointedTime) values(\"Main-1\"," +
                 " \"" + formattedDate + "T13:22\")");
         db.execSQL("insert into tasks(description, appointedTime) values(\"Main-2\"," +

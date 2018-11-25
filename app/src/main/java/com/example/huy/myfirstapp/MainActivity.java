@@ -9,12 +9,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,16 +30,17 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_1 = 123;
 
     private DatabaseHelper database;
-    private DBManager dbManager;
+    static DBManager dbManager;
     private ListView mainListView;
-    private String formattedNewTime;
+    private String hourMinute;
     private String fullFormattedNewTime;
     private String newDescription;
     private String description;
     private String time;
+
     ArrayList<Task> taskArrayList = new ArrayList<>();
     TaskAdapter adapter;
-    public static String CURRENT_DATE_FORMATTED;
+    public static String YEAR_MONTH_DAY;
 
 
     String[] columnNames = new String[]{COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME};
@@ -53,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
 
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        CURRENT_DATE_FORMATTED = df.format(date);
+        YEAR_MONTH_DAY = df.format(date);
 
         mainListView = findViewById(R.id.list_view_Main);
 
         TextView theDate = findViewById(R.id.Main_Date);
-        theDate.setText(CURRENT_DATE_FORMATTED);
+        theDate.setText(YEAR_MONTH_DAY);
 
         dbManager = new DBManager(this);
         dbManager.open();
@@ -117,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
                                           int minute) {
                         int selectedHour = hourOfDay;
                         int selectedMinute = minute;
-                        formattedNewTime = hourOfDay + ":" + minute;
-                        fullFormattedNewTime = CURRENT_DATE_FORMATTED+"T"+formattedNewTime;
+                        hourMinute = hourOfDay + ":" + minute;
+                        fullFormattedNewTime = YEAR_MONTH_DAY + "T" + hourMinute;
                         getDescription();
                     }
                 }, currentHourIn24Format, currentMinute, true);
@@ -140,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 newDescription = editText.getText().toString();
                 Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
-                notifyList();
+                notifyListAfterAdding();
             }
         });
 
@@ -157,8 +159,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void notifyList() {
-        taskArrayList.add(new Task(newDescription, formattedNewTime));
+
+    public void notifyListAfterAdding() {
+        taskArrayList.add(new Task(newDescription, hourMinute));
         dbManager.insert(newDescription, fullFormattedNewTime);
         adapter.notifyDataSetChanged();
     }
