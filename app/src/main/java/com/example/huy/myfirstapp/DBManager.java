@@ -48,11 +48,11 @@ public class DBManager {
         database.insert(TABLE_NAME, null, contentValues);
     }
 
-    public int update(long _id, String description, String time) {
+    public int update(String oldDescription, String newDescription, String time) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_DESCRIPTION, description);
+        contentValues.put(COLUMN_DESCRIPTION, newDescription);
         contentValues.put(COLUMN_TIME, time);
-        return database.update(TABLE_NAME, contentValues,COLUMN_ID + "=" + _id, null);
+        return database.update(TABLE_NAME, contentValues,COLUMN_DESCRIPTION + "= '" + oldDescription +"'", null);
     }
 
     public void delete(String description) {
