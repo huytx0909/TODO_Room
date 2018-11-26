@@ -99,8 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay,
                                           int minute) {
-                        int selectedHour = hourOfDay;
-                        int selectedMinute = minute;
                         hourMinute = hourOfDay + ":" + minute;
                         fullFormattedNewTime = YEAR_MONTH_DAY + "T" + hourMinute;
                         getDescription();
