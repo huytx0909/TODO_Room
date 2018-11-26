@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -15,7 +14,12 @@ import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
 
 public class DailyActivity extends AppCompatActivity {
     private TextView theDate;
+    public DBManager dbManager;
     private ListView dailyListView;
+    String description;
+    String time;
+    TaskAdapter adapter;
+    ArrayList<Task> taskArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,32 +31,30 @@ public class DailyActivity extends AppCompatActivity {
         Intent getDateIntent = getIntent();
         String date = getDateIntent.getStringExtra("date");
         theDate = findViewById(R.id.text_thedate);
-        theDate.setText(date + "\n" + "TO DO LISTT:");
+        theDate.setText(date + "\n" + "TO DO LIST:");
 
+        dbManager = new DBManager(this);
+        dbManager.open();
+        getData();
 
-        String description = null;
-        String time = null;
-        ArrayList<String> values = new ArrayList<>();
-        Cursor cursor = DBManager.dailyFetch();
+    }
+
+    public void getData() {
+        Cursor cursor = dbManager.dailyFetch();
         if (cursor.moveToFirst()) {
             description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
             time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-            String formattedTime = time.substring(11);
-            String timeAndDesc = formattedTime+"\n"+description;
-            values.add(timeAndDesc);
+            String shortTime = time.substring(11);
+            taskArrayList.add(new Task(description, shortTime));
             while (cursor.moveToNext()) {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-                formattedTime = time.substring(11);
-                timeAndDesc = formattedTime+"\n"+description;
-                values.add(timeAndDesc);
+                shortTime = time.substring(11);
+                taskArrayList.add(new Task(description, shortTime));
             }
+            adapter = new TaskAdapter(taskArrayList, DailyActivity.this);
+            dailyListView.setAdapter(adapter);
+            dailyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_multiple_choice, values);
-
-
-        dailyListView.setAdapter(adapter);
-        dailyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 }

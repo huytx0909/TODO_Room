@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.CalendarView;
+import android.widget.Toast;
 
 
 public class CalendarActivity extends AppCompatActivity {
@@ -21,12 +22,13 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
                 int realMonth = month + 1;
-                String formattedDate = year + "-" + realMonth + "-" + dayOfMonth;
-                chosenDate = formattedDate;
+                chosenDate = year + "-" + realMonth + "-" + dayOfMonth;
+                Toast.makeText(CalendarActivity.this, chosenDate, Toast.LENGTH_SHORT).show();
                 DBManager.setPickedDate();
 
+
                 Intent returnDateIntent = getIntent();
-                returnDateIntent.putExtra("date", formattedDate);
+                returnDateIntent.putExtra("date", chosenDate);
                 setResult(RESULT_OK, returnDateIntent);
                 finish();
             }

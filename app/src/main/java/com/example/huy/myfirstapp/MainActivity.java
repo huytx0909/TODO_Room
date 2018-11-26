@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -30,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_1 = 123;
 
     private DatabaseHelper database;
-    static DBManager dbManager;
+    public DBManager dbManager;
     private ListView mainListView;
     private String hourMinute;
     private String fullFormattedNewTime;
@@ -48,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Toast.makeText((this), "onCreate() called!",
-                Toast.LENGTH_LONG).show();
         setContentView(R.layout.activity_main);
         database = new DatabaseHelper(this);
 
@@ -80,25 +76,11 @@ public class MainActivity extends AppCompatActivity {
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
                 shortTime = time.substring(11);
                 taskArrayList.add(new Task(description, shortTime));
-                mainListView = findViewById(R.id.list_view_Main);
-                adapter = new TaskAdapter(taskArrayList, MainActivity.this);
-                mainListView.setAdapter(adapter);
-                mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             }
+            adapter = new TaskAdapter(taskArrayList, MainActivity.this);
+            mainListView.setAdapter(adapter);
+            mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-
-    @Override
-    protected void onStop() {
-        Toast.makeText((this), "onStop() called",
-                Toast.LENGTH_LONG).show();
-        super.onStop();
     }
 
 

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.example.huy.myfirstapp.MainActivity.YEAR_MONTH_DAY;
-import static com.example.huy.myfirstapp.MainActivity.dbManager;
 
 
 public class TaskAdapter extends BaseAdapter implements ListAdapter {
@@ -33,6 +32,7 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
     String hourMinute;
     int position;
     String description;
+    private DBManager dbManager;
 
     private String fullFormattedNewTime;
     private String newDescription;
@@ -40,6 +40,7 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
     public TaskAdapter(ArrayList<Task> list, Context context) {
         this.list = list;
         this.context = context;
+        dbManager = new DBManager(this.context);
     }
 
     public int getPosition() {

@@ -52,7 +52,7 @@ public class DBManager {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_DESCRIPTION, newDescription);
         contentValues.put(COLUMN_TIME, time);
-        return database.update(TABLE_NAME, contentValues,COLUMN_DESCRIPTION + "= '" + oldDescription +"'", null);
+        return database.update(TABLE_NAME, contentValues, COLUMN_DESCRIPTION + "= '" + oldDescription + "'", null);
     }
 
     public void delete(String description) {
@@ -64,11 +64,11 @@ public class DBManager {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String formattedDate = df.format(date);
 
-        String[] columns = new String[] {COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME, COLUMN_STATUS};
-        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME+" LIKE '"+ formattedDate +"%'",null,null,null,
+        String[] columns = new String[]{COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME, COLUMN_STATUS};
+        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME + " LIKE '" + formattedDate + "%'", null, null, null,
                 null);
 
-        if (cursor!=null) {
+        if (cursor != null) {
             cursor.moveToFirst();
         } else {
             Log.e("Wrong!", "null Cursor");
@@ -77,16 +77,12 @@ public class DBManager {
     }
 
 
-    static Cursor dailyFetch() {
-        Date date = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = df.format(date);
-
-        String[] columns = new String[] {COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME};
-        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME+" LIKE '"+ chosenDate +"%'",null,null,null,
+    Cursor dailyFetch() {
+        String[] columns = new String[]{COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME, COLUMN_STATUS};
+        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME + " LIKE '" + chosenDate + "%'", null, null, null,
                 null);
 
-        if (cursor!=null) {
+        if (cursor != null) {
             cursor.moveToFirst();
         } else {
             Log.e("Wrong!", "null Cursor");
@@ -94,25 +90,10 @@ public class DBManager {
         return cursor;
     }
 
-     static void setPickedDate() {
-                freshListViewDaily();
-                database.execSQL("insert into tasks(description, appointedTime) values(\"Daily-1\"," +
-                        " \""+chosenDate+"T13:22\")");
-    }
-
-    static void insertDummyMain() {
-        database.execSQL("insert into tasks(description, appointedTime) values(\"Main-1\"," +
-                " \"" + YEAR_MONTH_DAY + "T13:22\")");
-        database.execSQL("insert into tasks(description, appointedTime) values(\"Main-2\"," +
-                " \"" + YEAR_MONTH_DAY + "T14:50\")");
-    }
-
-    private static void freshListViewDaily() {
-        database.execSQL("delete from tasks where "+COLUMN_TIME+" LIKE '%"+chosenDate+"%'");
-    }
-
-    static void freshListViewMain() {
-        database.execSQL("delete from tasks where "+COLUMN_TIME+" Like '%"+ YEAR_MONTH_DAY +"%'");
+    static void setPickedDate() {
+//        database.execSQL("delete from tasks where " + COLUMN_TIME + " LIKE '%" + chosenDate + "%'");
+        database.execSQL("insert or replace into tasks(description, appointedTime) values(\"Daily-1\"," +
+                " \"" + chosenDate + "T13:22\")");
     }
 
 
