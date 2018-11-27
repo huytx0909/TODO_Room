@@ -30,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String formattedDate = df.format(date);
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT, appointedTime TEXT, " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT UNIQUE, appointedTime TEXT, " +
                 "status INTEGER default 0)");
         db.execSQL("insert into tasks(description, appointedTime) values(\"Main-1\"," +
                 " \"" + formattedDate + "T13:22\")");

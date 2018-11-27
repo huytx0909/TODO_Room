@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_DESCRIPTION;
+import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_STATUS;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
 import static com.example.huy.myfirstapp.CalendarActivity.chosenDate;
 
@@ -27,6 +29,7 @@ public class DailyActivity extends AppCompatActivity {
     private ListView dailyListView;
     String description;
     String time;
+    String status;
     TaskAdapter adapter;
     String selectedHourMinunite;
     String fullFormattedNewTime;
@@ -44,7 +47,7 @@ public class DailyActivity extends AppCompatActivity {
         String date = getDateIntent.getStringExtra("date");
         theDate = findViewById(R.id.text_thedate);
         theDate.setText(date + "\n" + "TO DO LIST:");
-
+        CheckBox checkBox_Daily = findViewById(R.id.checkBox_Main);
         dbManager = new DBManager(this);
         dbManager.open();
         getData();
@@ -56,13 +59,15 @@ public class DailyActivity extends AppCompatActivity {
         if (cursor.moveToFirst()) {
             description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
             time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
             String shortTime = time.substring(11);
-            taskArrayList.add(new Task(description, shortTime));
+            taskArrayList.add(new Task(description, shortTime,status));
             while (cursor.moveToNext()) {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
                 shortTime = time.substring(11);
-                taskArrayList.add(new Task(description, shortTime));
+                taskArrayList.add(new Task(description, shortTime, status));
             }
             adapter = new TaskAdapter(taskArrayList, DailyActivity.this);
             dailyListView.setAdapter(adapter);
@@ -120,7 +125,7 @@ public class DailyActivity extends AppCompatActivity {
     }
 
     public void notifyListAfterAdding() {
-        taskArrayList.add(new Task(newDescription, selectedHourMinunite));
+        taskArrayList.add(new Task(newDescription, selectedHourMinunite, status));
         dbManager.insert(newDescription, fullFormattedNewTime);
         adapter.notifyDataSetChanged();
     }

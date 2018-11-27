@@ -8,7 +8,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,6 +23,7 @@ import java.util.Date;
 
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_DESCRIPTION;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_ID;
+import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_STATUS;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
 
 
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private String newDescription;
     private String description;
     private String time;
+    private String status;
 
     ArrayList<Task> taskArrayList = new ArrayList<>();
     TaskAdapter adapter;
@@ -69,13 +73,15 @@ public class MainActivity extends AppCompatActivity {
         if (cursor.moveToFirst()) {
             description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
             time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
             String shortTime = time.substring(11);
-            taskArrayList.add(new Task(description, shortTime));
+            taskArrayList.add(new Task(description, shortTime, status));
             while (cursor.moveToNext()) {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
                 shortTime = time.substring(11);
-                taskArrayList.add(new Task(description, shortTime));
+                taskArrayList.add(new Task(description, shortTime, status));
             }
             adapter = new TaskAdapter(taskArrayList, MainActivity.this);
             mainListView.setAdapter(adapter);
@@ -141,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void notifyListAfterAdding() {
-        taskArrayList.add(new Task(newDescription, hourMinute));
+        taskArrayList.add(new Task(newDescription, hourMinute, status));
         dbManager.insert(newDescription, fullFormattedNewTime);
         adapter.notifyDataSetChanged();
     }

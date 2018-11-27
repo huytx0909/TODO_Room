@@ -4,11 +4,13 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
@@ -79,8 +81,28 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
         tvTime = view.findViewById(R.id.textView_timeMain);
         tvDescription = view.findViewById(R.id.textView_DescriptionMain);
         CheckBox checkBox = view.findViewById(R.id.checkBox_Main);
-        tvTime.setText(list.get(position).getAppointedTime());
         tvDescription.setText(list.get(position).getDescription());
+        tvTime.setText(list.get(position).getAppointedTime());
+
+
+        String isChecked = list.get(position).getIsChecked();
+
+        Log.e("TAG CC", isChecked);
+
+        if (isChecked.equals("1")) {
+            checkBox.setChecked(true);
+        } else {
+            checkBox.setChecked(false);
+        }
+
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                description = tvDescription.getText().toString();
+                DBManager.setStatus(isChecked, description);
+            }
+        });
+
 
         ImageButton deleteBtn = view.findViewById(R.id.imageButton_Delete);
         ImageButton editBtn = view.findViewById(R.id.imageButton_Edit);
@@ -88,7 +110,6 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
         deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //do something
                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
                 alert.setTitle("Confirm Delete");
                 alert.setMessage("Are you sure you want to delete this task?");
@@ -144,7 +165,7 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                     public void onClick(DialogInterface dialog, int which) {
                         newDescription = editText.getText().toString();
                         dbManager.update(description, newDescription, fullFormattedNewTime);
-                        list.set(position, new Task(newDescription, hourMinute));
+                        list.set(position, new Task(newDescription, hourMinute,"0"));
                         Toast.makeText(context, "Edited", Toast.LENGTH_LONG).show();
                         notifyDataSetChanged();
                     }

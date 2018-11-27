@@ -16,7 +16,6 @@ import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_ID;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_STATUS;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
 import static com.example.huy.myfirstapp.DatabaseHelper.TABLE_NAME;
-import static com.example.huy.myfirstapp.MainActivity.YEAR_MONTH_DAY;
 import static com.example.huy.myfirstapp.CalendarActivity.chosenDate;
 
 public class DBManager {
@@ -91,9 +90,20 @@ public class DBManager {
     }
 
     static void setPickedDate() {
-//        database.execSQL("delete from tasks where " + COLUMN_TIME + " LIKE '%" + chosenDate + "%'");
+        database.execSQL("delete from " +  TABLE_NAME + " where " + COLUMN_TIME + " = " + chosenDate);
         database.execSQL("insert or replace into tasks(description, appointedTime) values(\"Daily-1\"," +
                 " \"" + chosenDate + "T13:22\")");
+    }
+
+    static void setStatus(Boolean isChecked, String description) {
+        ContentValues contentValues = new ContentValues();
+        if (isChecked) {
+            contentValues.put(COLUMN_STATUS, "1");
+            database.update(TABLE_NAME, contentValues, COLUMN_DESCRIPTION + "= '" + description + "'", null);
+        } else {
+            contentValues.put(COLUMN_STATUS, "0");
+            database.update(TABLE_NAME, contentValues, COLUMN_DESCRIPTION + "= '" + description + "'", null);
+        }
     }
 
 
