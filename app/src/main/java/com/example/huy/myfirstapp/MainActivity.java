@@ -4,22 +4,21 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private String description;
     private String time;
     private String status;
+    private ArrayList<String> fullTimeStringArray;
 
     ArrayList<Task> taskArrayList = new ArrayList<>();
     TaskAdapter adapter;
@@ -62,15 +62,17 @@ public class MainActivity extends AppCompatActivity {
         YEAR_MONTH_DAY = df.format(date);
 
         mainListView = findViewById(R.id.list_view_Main);
-
         TextView theDate = findViewById(R.id.Main_Date);
         theDate.setText(YEAR_MONTH_DAY);
-
         dbManager = new DBManager(this);
         dbManager.open();
         getData();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     public void getData() {
         Cursor cursor = dbManager.fetch();
@@ -78,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
             description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
             time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
             status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
+            if (status.equals("0")) {
+                //do nothing
+            }
             String shortTime = time.substring(11);
             taskArrayList.add(new Task(description, shortTime, status));
             while (cursor.moveToNext()) {
@@ -86,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
                 status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
                 shortTime = time.substring(11);
                 taskArrayList.add(new Task(description, shortTime, status));
+                if (status.equals("0")) {
+                    //do nothing
+                }
             }
             adapter = new TaskAdapter(taskArrayList, MainActivity.this);
             mainListView.setAdapter(adapter);
@@ -116,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 }, currentHourIn24Format, currentMinute, true);
         timePickerDialog.show();
     }
-
 
 
     public boolean getDescription() {
@@ -156,12 +163,67 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    public void testButtonOnclick(View view) {
-        Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
+    //TODO onStop must perform a query for unchecked item and set alarms
+    @Override
+    protected void onStop() {
+        Cursor cursor = dbManager.fetch();
+        if (cursor.moveToFirst()) {
+            description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
+            time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
+            if (status.equals("0")) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                Date date = null;
+                try {
+                    date = simpleDateFormat.parse(time);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                long milis = date.getTime();
+                AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+                Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+            }
+            String shortTime = time.substring(11);
+            taskArrayList.add(new Task(description, shortTime, status));
+            while (cursor.moveToNext()) {
+                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
+                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
+                shortTime = time.substring(11);
+                taskArrayList.add(new Task(description, shortTime, status));
+                if (status.equals("0")) {
+                    if (status.equals("0")) {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                        Date date = null;
+                        try {
+                            date = simpleDateFormat.parse(time);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        long milis = date.getTime();
+                        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+                        Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+                    }
+                }
+            }
 
-        AlarmManager alarmManager = (AlarmManager)this.getSystemService(ALARM_SERVICE);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pendingIntent);
+//        String timeSample = "2018-12-02T15:16:00";
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+//        Date abc = null;
+//        try {
+//            abc = simpleDateFormat.parse(timeSample);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//
+//        long milis = abc.getTime();
+
+            super.onStop();
+        }
     }
 
     @Override

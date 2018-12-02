@@ -32,11 +32,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT UNIQUE, appointedTime TEXT, " +
                 "status INTEGER default 0)");
-        db.execSQL("insert into tasks(description, appointedTime) values(\"Main-1\"," +
-                " \"" + formattedDate + "T13:22\")");
-        db.execSQL("insert into tasks(description, appointedTime) values(\"Main-2\"," +
-                " \"" + formattedDate + "T14:50\")");
-
+        db.execSQL("insert into tasks(description, appointedTime, status) values(\"Main-1\"," +
+                " \"" + formattedDate + "T13:22\", \"1\")");
+        db.execSQL("insert into tasks(description, appointedTime,status) values(\"Main-2\"," +
+                " \"" + formattedDate + "T14:50\", \"1\")");
     }
 
 
