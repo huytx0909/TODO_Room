@@ -130,4 +130,9 @@ public class DailyActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    //todo also set alarms for the unchecked items.
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 }

@@ -10,6 +10,9 @@ import java.util.Date;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+
+    static final int DB_VERSION = 1;
+//    database table and columns
     public static final String DB_NAME = "tasks.db";
     public static final String TABLE_NAME = "tasks";
     public static final String COLUMN_ID = "_id";
@@ -18,8 +21,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_STATUS = "status";
 
 
+
+
     public DatabaseHelper(Context context) {
-        super(context, DB_NAME, null, 1);
+        super(context, DB_NAME, null, DB_VERSION);
         SQLiteDatabase database = this.getWritableDatabase();
     }
 
@@ -31,10 +36,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String formattedDate = df.format(date);
 
         db.execSQL("CREATE TABLE IF NOT EXISTS tasks(_id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT UNIQUE, appointedTime TEXT, " +
-                "status INTEGER default 0)");
-        db.execSQL("insert into tasks(description, appointedTime, status) values(\"Main-1\"," +
+                "status INTEGER default '0')");
+        db.execSQL("insert or replace into tasks(description, appointedTime, status) values(\"Main-1\"," +
                 " \"" + formattedDate + "T13:22\", \"1\")");
-        db.execSQL("insert into tasks(description, appointedTime,status) values(\"Main-2\"," +
+        db.execSQL("insert or replace into tasks(description, appointedTime,status) values(\"Main-2\"," +
                 " \"" + formattedDate + "T14:50\", \"1\")");
     }
 
@@ -44,5 +49,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + DB_NAME);
         onCreate(db);
     }
-
 }

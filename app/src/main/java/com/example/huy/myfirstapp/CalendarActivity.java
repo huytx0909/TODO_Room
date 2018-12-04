@@ -22,7 +22,11 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
                 int realMonth = month + 1;
+                if (dayOfMonth < 10){
+                    chosenDate = year + "-" + realMonth + "-" + "0"+ dayOfMonth;
+                } else {
                 chosenDate = year + "-" + realMonth + "-" + dayOfMonth;
+                }
                 Toast.makeText(CalendarActivity.this, chosenDate, Toast.LENGTH_SHORT).show();
                 DBManager.setPickedDate();
 
