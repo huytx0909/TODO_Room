@@ -176,9 +176,10 @@ public class MainActivity extends AppCompatActivity {
                     long milis = date.getTime();
                     AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
                     Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
-
+                    sendAlarmService.putExtra("time", time);
+                    sendAlarmService.putExtra("description", description);
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
-                    requestCode=requestCode+1;
+                    requestCode++;
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
                 }
             } while (cursor.moveToNext());
