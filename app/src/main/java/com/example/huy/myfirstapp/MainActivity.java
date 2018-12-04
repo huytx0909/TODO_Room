@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 newDescription = editText.getText().toString();
                 Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
                 notifyListAfterAdding();
-                Toast.makeText(MainActivity.this, "total task in list:"+taskArrayList.size(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "total task in list:" + taskArrayList.size(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -155,59 +155,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //TODO onStop must perform a query for unchecked item and set alarms
-//    @Override
-//    protected void onStop() {
-//        Cursor cursor = dbManager.fetch();
-//        if (cursor.moveToFirst()) {
-//            description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-//            time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-//            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-//            if (status.equals("0")) {
-//                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-//                Date date = null;
-//                try {
-//                    date = simpleDateFormat.parse(time);
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                }
-//                long milis = date.getTime();
-//                AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-//                Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
-//                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
-//                alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
-//            }
-//            String shortTime = time.substring(11);
-//            taskArrayList.add(new Task(description, shortTime, status));
-//            while (cursor.moveToNext()) {
-//                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-//                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-//                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-//                shortTime = time.substring(11);
-//                taskArrayList.add(new Task(description, shortTime, status));
-//                if (status.equals("0")) {
-//                    if (status.equals("0")) {
-//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-//                        Date date = null;
-//                        try {
-//                            date = simpleDateFormat.parse(time);
-//                        } catch (ParseException e) {
-//                            e.printStackTrace();
-//                        }
-//                        long milis = date.getTime();
-//                        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-//                        Intent sendAlarmServiceIntent = new Intent(this, AlarmReceiver.class);
-//                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, sendAlarmServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//                        sendAlarmServiceIntent.putExtra("time", shortTime);
-//                        sendAlarmServiceIntent.putExtra("description", description);
-//
-//                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
-//                    }
-//                }
-//            }
-//        }
-//        super.onStop();
-//    }
+
+    @Override
+    protected void onStop() {
+        Cursor cursor = dbManager.fetch();
+        if (cursor.moveToFirst()) {
+            int requestCode=0;
+            do {
+                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
+                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
+                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
+                if (status.equals("0")) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                    Date date = null;
+                    try {
+                        date = simpleDateFormat.parse(time);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    long milis = date.getTime();
+                    AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+                    Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
+
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
+                    requestCode=requestCode+1;
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+                }
+            } while (cursor.moveToNext());
+        }
+        super.onStop();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
