@@ -6,8 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 
 public class TestingActivity extends AppCompatActivity {
-//TODO Create a notification, get task info from the Intent
-    //TODO this activity will be created multiple time, there is no need to loop in this.
+//TODO Create a notification, get task info from the information retrieved
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

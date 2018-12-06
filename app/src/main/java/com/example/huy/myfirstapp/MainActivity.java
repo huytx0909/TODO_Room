@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -74,19 +75,15 @@ public class MainActivity extends AppCompatActivity {
     public void getData() {
         Cursor cursor = dbManager.fetch();
         if (cursor.moveToFirst()) {
-            description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-            time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-
-            String shortTime = time.substring(11);
-            taskArrayList.add(new Task(description, shortTime, status));
-            while (cursor.moveToNext()) {
+            do {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
                 status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-                shortTime = time.substring(11);
+
+                String shortTime = time.substring(11);
                 taskArrayList.add(new Task(description, shortTime, status));
             }
+            while (cursor.moveToNext());
             adapter = new TaskAdapter(taskArrayList, MainActivity.this);
             mainListView.setAdapter(adapter);
             mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -128,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 newDescription = editText.getText().toString();
-                Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
                 notifyListAfterAdding();
-                Toast.makeText(MainActivity.this, "total task in list:" + taskArrayList.size(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -154,13 +149,11 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    //TODO onStop must perform a query for unchecked item and set alarms
-
     @Override
     protected void onStop() {
         Cursor cursor = dbManager.fetch();
         if (cursor.moveToFirst()) {
-            int requestCode=0;
+            int requestCode = 0;
             do {
                 description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
                 time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
@@ -180,12 +173,15 @@ public class MainActivity extends AppCompatActivity {
                     sendAlarmService.putExtra("description", description);
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
                     requestCode++;
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+                    if (milis > System.currentTimeMillis()) {
+                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+                    }
                 }
             } while (cursor.moveToNext());
         }
         super.onStop();
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
