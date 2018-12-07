@@ -2,7 +2,7 @@
     <string name="app_name">Task Manager</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Send</string>
-    <string name="WelcomeLabel">Welcome to TASK MANAGER!</string>
+    <string name="WelcomeLabel">Task Manager</string>
     <string name="DatePick">Or go to specific date</string>
     <string name="CalendarButton">Go to calendar</string>
     <string name="text_ToDay">Today is</string>

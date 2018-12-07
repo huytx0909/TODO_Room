@@ -16,7 +16,8 @@ import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_ID;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_STATUS;
 import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
 import static com.example.huy.myfirstapp.DatabaseHelper.TABLE_NAME;
-import static com.example.huy.myfirstapp.CalendarActivity.chosenDate;
+import static com.example.huy.myfirstapp.CalendarActivity.CHOSEN_DATE;
+import static com.example.huy.myfirstapp.MainActivity.YEAR_MONTH_DAY;
 
 public class DBManager {
     private DatabaseHelper databaseHelper;
@@ -78,7 +79,7 @@ public class DBManager {
 
     Cursor dailyFetch() {
         String[] columns = new String[]{COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_TIME, COLUMN_STATUS};
-        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME + " LIKE '" + chosenDate + "%'", null, null, null,
+        Cursor cursor = database.query(TABLE_NAME, columns, COLUMN_TIME + " LIKE '" + CHOSEN_DATE + "%'", null, null, null,
                 null);
 
         if (cursor != null) {
@@ -90,9 +91,15 @@ public class DBManager {
     }
 
     static void setPickedDate() {
-        database.execSQL("delete from " +  TABLE_NAME + " where " + COLUMN_TIME + " = " + chosenDate);
-        database.execSQL("insert or replace into tasks(description, appointedTime) values(\"Daily-1\"," +
-                " \"" + chosenDate + "T13:22\")");
+        database.execSQL("delete from " +  TABLE_NAME + " where " + COLUMN_DESCRIPTION + " LIKE '%Example%'");
+        database.execSQL("insert or replace into tasks(description, appointedTime) values(\"Example description\"," +
+                " \"" + CHOSEN_DATE + "T13:22\")");
+    }
+
+    public void insertMain() {
+        database.execSQL("delete from " +  TABLE_NAME + " where " + COLUMN_DESCRIPTION + " LIKE '%Example%'");
+        database.execSQL("insert into tasks(description, appointedTime, status) values(\"Example Description\"," +
+                " \"" + YEAR_MONTH_DAY + "T13:22\", \"1\")");
     }
 
     static void setStatus(Boolean isChecked, String description) {

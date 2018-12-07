@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         theDate.setText(YEAR_MONTH_DAY);
         dbManager = new DBManager(this);
         dbManager.open();
+        dbManager.insertMain();
         getData();
     }
 
@@ -132,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                newDescription = null;
+                newDescription = description;
+                notifyListAfterAdding();
             }
         });
         alert.show();

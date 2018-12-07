@@ -174,7 +174,7 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        newDescription = null;
+                        newDescription = description;
                     }
                 });
                 alert.show();

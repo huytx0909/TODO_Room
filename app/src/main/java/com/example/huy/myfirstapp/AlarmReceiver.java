@@ -1,8 +1,8 @@
 package com.example.huy.myfirstapp;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +31,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
 
+        Intent goToHome = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, goToHome, 0);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID);
         notificationBuilder.setAutoCancel(true)
@@ -40,11 +43,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setTicker("It's time")
                 .setContentTitle(time.substring(11,16))
                 .setContentText(description)
-                .setContentInfo("Info");
+                .setContentInfo("Info")
+                .setContentIntent(pendingIntent);
 
         Log.e("TEST", "code ran here!");
         notificationManager.notify((int) (Math.random() * 100 + 1), notificationBuilder.build());
         notificationId++;
+
+
 
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
