@@ -42,9 +42,6 @@
         <activity
             android:name=".DailyActivity"
             android:parentActivityName=".CalendarActivity" />
-        <activity android:name=".TestingActivity">
-
-        </activity>
 
         <receiver android:name=".AlarmReceiver"
             android:enabled="true"

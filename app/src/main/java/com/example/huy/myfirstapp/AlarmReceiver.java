@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
@@ -16,6 +17,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     String time;
     String description;
     int notificationId;
+    String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -28,14 +30,14 @@ public class AlarmReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String NOTIFICATION_CHANNEL_ID = "my_channel_id_01";
 
-        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,
-                "YOUR_CHANNEL_NAME",
-                NotificationManager.IMPORTANCE_DEFAULT);
-        channel.setDescription("Description");
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "myNoti", NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription(description);
+        channel.enableLights(true);
+        channel.setLightColor(Color.RED);
+        channel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+        channel.enableVibration(true);
         notificationManager.createNotificationChannel(channel);
 
         Intent goToHome = new Intent(context, MainActivity.class);
@@ -48,16 +50,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.mipmap.task_manager)
                 .setTicker("It's time")
-                .setContentTitle(time.substring(11,16))
+                .setContentTitle(time.substring(11))
                 .setContentText(description)
                 .setContentInfo("Info")
                 .setContentIntent(pendingIntent);
 
         Log.e("TEST", "code ran here!");
+
         notificationManager.notify((int) (Math.random() * 100 + 1), notificationBuilder.build());
-        notificationId++;
-
-
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         boolean isInteractive = pm.isInteractive();

@@ -22,14 +22,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_DESCRIPTION;
-import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_STATUS;
-import static com.example.huy.myfirstapp.DatabaseHelper.COLUMN_TIME;
+
 import static com.example.huy.myfirstapp.CalendarActivity.CHOSEN_DATE;
 
 public class DailyActivity extends AppCompatActivity {
     private TextView theDate;
-    public DBManager dbManager;
     private ListView dailyListView;
     String description;
     String time;
@@ -50,14 +47,11 @@ public class DailyActivity extends AppCompatActivity {
         Intent getDateIntent = getIntent();
         String date = getDateIntent.getStringExtra("date");
         theDate = findViewById(R.id.text_thedate);
-        theDate.setText(date + "\n" + "TO DO LIST:");
-        dbManager = new DBManager(this);
-        dbManager.open();
-        getData();
+//        getData();
 
     }
 
-    public void getData() {
+    /*public void getData() {
         Cursor cursor = dbManager.dailyFetch();
         if (cursor.moveToFirst()) {
             do {
@@ -73,7 +67,7 @@ public class DailyActivity extends AppCompatActivity {
             dailyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         }
     }
-
+*/
     public void addTaskDaily(View view) {
         Calendar rightNow = Calendar.getInstance();
         int currentHourIn24Format = rightNow.get(Calendar.HOUR_OF_DAY);
@@ -125,13 +119,12 @@ public class DailyActivity extends AppCompatActivity {
 
     public void notifyListAfterAdding() {
         taskArrayList.add(new Task(newDescription, selectedHourMinute, status));
-        dbManager.insert(newDescription, fullFormattedNewTime);
-        adapter.notifyDataSetChanged();
+//        adapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onStop() {
-        Cursor cursor = dbManager.dailyFetch();
+/*        Cursor cursor = dbManager.dailyFetch();
         if (cursor.moveToFirst()) {
             int requestCode = 0;
             do {
@@ -158,7 +151,7 @@ public class DailyActivity extends AppCompatActivity {
                     }
                 }
             } while (cursor.moveToNext());
-        }
+        }*/
         super.onStop();
     }
 }

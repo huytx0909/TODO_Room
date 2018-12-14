@@ -17,15 +17,15 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
-import static com.example.huy.myfirstapp.MainActivity.YEAR_MONTH_DAY;
+import static com.example.huy.myfirstapp.MainActivity.CURRENT_YEAR_MONTH_DAY;
+import static com.example.huy.myfirstapp.MainActivity.taskDatabase;
 
 
 public class TaskAdapter extends BaseAdapter implements ListAdapter {
-    private ArrayList<Task> list;
+    private List<Task> list;
     private Context context;
     private TextView tvTime;
     private TextView tvDescription;
@@ -34,15 +34,13 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
     String hourMinute;
     int position;
     String description;
-    private DBManager dbManager;
 
     private String fullFormattedNewTime;
     private String newDescription;
 
-    public TaskAdapter(ArrayList<Task> list, Context context) {
+    public TaskAdapter(List<Task> list, Context context) {
         this.list = list;
         this.context = context;
-        dbManager = new DBManager(this.context);
     }
 
     public int getPosition() {
@@ -81,13 +79,19 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
         tvTime = view.findViewById(R.id.textView_timeMain);
         tvDescription = view.findViewById(R.id.textView_DescriptionMain);
         CheckBox checkBox = view.findViewById(R.id.checkBox_Main);
+
+//        new Thread() {
+//            @Override
+//            public void run() {
+//                tvDescription.setText(taskDatabase.taskDao().get1Task(list.get(position).getDescription()));
+//            }
+//        }
+//
+//
         tvDescription.setText(list.get(position).getDescription());
-        tvTime.setText(list.get(position).getAppointedTime());
-
-
+        tvTime.setText(list.get(position).getAppointedTime().substring(11));
         String isChecked = list.get(position).getIsChecked();
 
-        Log.e("TAG CC", isChecked);
 
         if (isChecked.equals("1")) {
             checkBox.setChecked(true);
@@ -98,8 +102,20 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                description = tvDescription.getText().toString();
-                DBManager.setStatus(isChecked, description);
+                description = list.get(position).getDescription();
+                Toast.makeText(context, "description checked: " + description, Toast.LENGTH_LONG).show();
+                final String checkBoxStatus;
+                if(isChecked) {
+                    checkBoxStatus = "1";
+                } else {
+                    checkBoxStatus = "0";
+                }
+                new Thread() {
+                    @Override
+                    public void run() {
+                        taskDatabase.taskDao().setStatus(checkBoxStatus, description);
+                    }
+                }.start();
             }
         });
 
@@ -117,8 +133,14 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         description = tvDescription.getText().toString();
-                        dbManager.delete(description);
-                        list.remove(position);
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                taskDatabase.taskDao().delete(taskDatabase.taskDao().get1Task(description));
+                                list.remove(position);
+//                                Toast.makeText(context, "removed: " + description, Toast.LENGTH_SHORT).show();
+                            }
+                        }.start();
                         notifyDataSetChanged();
                     }
                 });
@@ -148,7 +170,13 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                                 selectedHour = hourOfDay;
                                 selectedMinute = minute;
                                 hourMinute = hourOfDay + ":" + minute;
-                                fullFormattedNewTime = YEAR_MONTH_DAY + "T" + hourMinute;
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        fullFormattedNewTime =  CURRENT_YEAR_MONTH_DAY
+                                                + "T" + hourMinute;
+                                    }
+                                }.start();
                             }
                         }, currentHourIn24Format, currentMinute, true);
 
@@ -163,11 +191,17 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        newDescription = editText.getText().toString();
-                        dbManager.update(description, newDescription, fullFormattedNewTime);
-                        list.set(position, new Task(newDescription, hourMinute,"0"));
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                newDescription = editText.getText().toString();
+                                taskDatabase.taskDao().update(description, newDescription, fullFormattedNewTime);
+                                list.set(position, new Task(newDescription, fullFormattedNewTime,"0"));
+                            }
+                        }.start();
                         Toast.makeText(context, "Edited", Toast.LENGTH_LONG).show();
                         notifyDataSetChanged();
+                        Log.e("EDIT", "code ran here");
                     }
                 });
 
@@ -184,8 +218,6 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
 
         this.position = position;
         description = tvDescription.getText().toString();
-
         return view;
     }
-
 }

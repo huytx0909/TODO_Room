@@ -47,7 +47,6 @@
         android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:contentDescription="@string/button_Delete"
-        android:onClick="deleteTask"
         app:srcCompat="@android:drawable/ic_menu_delete" />
 
     <ImageButton
@@ -63,6 +62,7 @@
 
     <CheckBox
         android:id="@+id/checkBox_Main"
+        style="@android:style/Widget.Holo.CompoundButton.CheckBox"
         android:layout_width="33dp"
         android:layout_height="33dp"
         android:layout_alignParentTop="true"

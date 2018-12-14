@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.CalendarView;
 import android.widget.Toast;
 
-import static com.example.huy.myfirstapp.MainActivity.YEAR_MONTH_DAY;
+import static com.example.huy.myfirstapp.MainActivity.CURRENT_YEAR_MONTH_DAY;
 
 public class CalendarActivity extends AppCompatActivity {
     private CalendarView calendarView;
@@ -29,11 +29,10 @@ public class CalendarActivity extends AppCompatActivity {
                     CHOSEN_DATE = year + "-" + realMonth + "-" + dayOfMonth;
                 }
                 Toast.makeText(CalendarActivity.this, CHOSEN_DATE, Toast.LENGTH_SHORT).show();
-                if (CHOSEN_DATE.equals(YEAR_MONTH_DAY)) {
+                if (CHOSEN_DATE.equals(CURRENT_YEAR_MONTH_DAY)) {
                     Intent backToHome = new Intent(CalendarActivity.this, MainActivity.class);
                     CalendarActivity.this.startActivity(backToHome);
                 } else {
-                    DBManager.setPickedDate();
                     Intent returnDateIntent = getIntent();
                     returnDateIntent.putExtra("date", CHOSEN_DATE);
                     setResult(RESULT_OK, returnDateIntent);
