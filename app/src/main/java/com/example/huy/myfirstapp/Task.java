@@ -13,12 +13,12 @@ public class Task {
     @ColumnInfo(name = "time")
     private String appointedTime;
     @ColumnInfo(name = "status")
-    private String isChecked;
+    private String status;
 
-    public Task(String description, String appointedTime, String isChecked) {
+    public Task(String description, String appointedTime, String status) {
         this.description = description;
         this.appointedTime = appointedTime;
-        this.isChecked = isChecked;
+        this.status = status;
     }
 
     public void set_id(int _id) {
@@ -29,6 +29,10 @@ public class Task {
         return _id;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -37,7 +41,7 @@ public class Task {
         return appointedTime;
     }
 
-    public String getIsChecked() {
-        return isChecked;
+    public String getStatus() {
+        return status;
     }
 }

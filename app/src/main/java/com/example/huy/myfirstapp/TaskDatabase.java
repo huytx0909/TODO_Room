@@ -8,8 +8,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
-
 import static com.example.huy.myfirstapp.MainActivity.CURRENT_FULL_TIME;
 import static com.example.huy.myfirstapp.MainActivity.taskDatabase;
 

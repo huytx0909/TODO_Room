@@ -15,14 +15,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
+
+import static com.example.huy.myfirstapp.CalendarActivity.CHOSEN_DATE;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static TaskDatabase taskDatabase;
     private List<Task> taskList;
     TaskAdapter adapter;
+    String timeForQuery;
     public static String CURRENT_YEAR_MONTH_DAY;
     public static String CURRENT_FULL_TIME;
 
@@ -46,22 +47,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Date date = Calendar.getInstance().getTime();
-
         SimpleDateFormat year_month_day = new SimpleDateFormat("yyyy-MM-dd");
         CURRENT_YEAR_MONTH_DAY = year_month_day.format(date);
 
         SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         CURRENT_FULL_TIME = fullFormat.format(date);
+        this.timeForQuery = "%" + CURRENT_YEAR_MONTH_DAY + "%";
+        taskDatabase = TaskDatabase.getDatabaseInstance(this);
+        new Thread() {
+            @Override
+            public void run() {
+                taskList = taskDatabase.taskDao().loadAllByTime(timeForQuery);
+                Log.e("timeStamp oncreate & size:", timeForQuery + "" +taskList.size());
+                if (taskList.size() == 0) {
+                    taskDatabase.taskDao().insert(new Task("Example Task", CURRENT_FULL_TIME, "1"));
+                }
+            }
+        }.start();
+
+
 
         mainListView = findViewById(R.id.list_view_Main);
         mainDate = findViewById(R.id.Main_Date);
         mainDate.setText(CURRENT_YEAR_MONTH_DAY);
-        taskDatabase = TaskDatabase.getDatabaseInstance(this);
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            //
-        }
         getData();
     }
 
@@ -69,15 +77,12 @@ public class MainActivity extends AppCompatActivity {
         Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                String timeForQuery = "'%" + CURRENT_YEAR_MONTH_DAY + "%'";
-
-                taskList = taskDatabase.taskDao().getAll();
-                Log.e("time string: ", timeForQuery);
-                Log.e("taskList size", "" + (taskList.size()));
+                taskList = taskDatabase.taskDao().loadAllByTime(timeForQuery);
+                Log.e("timeStamp getData & size: ", timeForQuery + "" + taskList.size());
                 for (Task task : taskList) {
                     description = task.getDescription();
                     time = task.getAppointedTime();
-                    status = task.getIsChecked();
+                    status = task.getStatus();
                     adapter = new TaskAdapter(taskList, MainActivity.this);
                     mainListView.setAdapter(adapter);
                     mainListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -127,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                         taskList.add(new Task(newDescription, fullFormattedNewTime, "0"));
                     }
                 });
-                Toast.makeText(MainActivity.this, "taskList after add: " + taskList.size(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "taskList after add: " + taskList.size(), Toast.LENGTH_SHORT).show();
                 adapter.notifyDataSetChanged();
             }
         });
@@ -149,12 +154,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        Log.e("task list size in onStop", "" + taskList.size());
+
         int requestCode = 0;
         for (Task task : taskList) {
             description = task.getDescription();
             time = task.getAppointedTime();
-            status = task.getIsChecked();
+            status = task.getStatus();
 
             if (status.equals("0")) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -175,37 +180,11 @@ public class MainActivity extends AppCompatActivity {
                 if (milis > System.currentTimeMillis()) {
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
                 }
+            } else {
+                // do nothing
             }
-//        Cursor cursor = dbManager.fetch();
-//        if (cursor.moveToFirst()) {
-//            int requestCode = 0;
-//            do {
-//                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-//                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-//                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-//                if (status.equals("0")) {
-//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-//                    Date date = null;
-//                    try {
-//                        date = simpleDateFormat.parse(time);
-//                    } catch (ParseException e) {
-//                        e.printStackTrace();
-//                    }
-//                    long milis = date.getTime();
-//                    AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-//                    Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
-//                    sendAlarmService.putExtra("time", time);
-//                    sendAlarmService.putExtra("description", description);
-//                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
-//                    requestCode++;
-//                    if (milis > System.currentTimeMillis()) {
-//                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
-//                    }
-//                }
-//            } while (cursor.moveToNext());
-//        }
-            super.onStop();
         }
+        super.onStop();
     }
 
     @Override
@@ -213,10 +192,22 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_1) {
             if (resultCode == RESULT_OK) {
-                String date = data.getStringExtra("date");
+                final String date = data.getStringExtra("date");
                 if (date != null) {
                     Intent dailyIntent = new Intent(this, DailyActivity.class);
                     dailyIntent.putExtra("date", date);
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            String chosenDateString = "%" + CHOSEN_DATE + "%";
+                            List<Task> dailyTaskList = taskDatabase.taskDao().loadAllByTime(chosenDateString);
+                            if (dailyTaskList.size() == 0) {
+                                taskDatabase.taskDao().insert(new Task("Another Example", date + "T16:20", "0"));
+                            } else {
+                                // do not add.
+                            }
+                        }
+                    }.start();
                     startActivity(dailyIntent);
                 }
             }

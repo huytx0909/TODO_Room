@@ -27,14 +27,13 @@ import static com.example.huy.myfirstapp.MainActivity.taskDatabase;
 public class TaskAdapter extends BaseAdapter implements ListAdapter {
     private List<Task> list;
     private Context context;
-    private TextView tvTime;
-    private TextView tvDescription;
     int selectedHour;
     int selectedMinute;
     String hourMinute;
     int position;
     String description;
-
+    String status;
+    int tag;
     private String fullFormattedNewTime;
     private String newDescription;
 
@@ -71,45 +70,42 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
+        final ViewHolder viewHolder;
+
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.row_item, null);
-        }
+            viewHolder = new ViewHolder();
+            viewHolder.checkBox = view.findViewById(R.id.checkBox_Main);
+            viewHolder.description = view.findViewById(R.id.textView_DescriptionMain);
+            viewHolder.time = view.findViewById(R.id.textView_timeMain);
+            view.setTag(viewHolder);
 
-        tvTime = view.findViewById(R.id.textView_timeMain);
-        tvDescription = view.findViewById(R.id.textView_DescriptionMain);
-        CheckBox checkBox = view.findViewById(R.id.checkBox_Main);
+            viewHolder.description.setText(list.get(position).getDescription());
+            viewHolder.time.setText(list.get(position).getAppointedTime().substring(11));
+            status = list.get(position).getStatus();
 
-//        new Thread() {
-//            @Override
-//            public void run() {
-//                tvDescription.setText(taskDatabase.taskDao().get1Task(list.get(position).getDescription()));
-//            }
-//        }
-//
-//
-        tvDescription.setText(list.get(position).getDescription());
-        tvTime.setText(list.get(position).getAppointedTime().substring(11));
-        String isChecked = list.get(position).getIsChecked();
-
-
-        if (isChecked.equals("1")) {
-            checkBox.setChecked(true);
         } else {
-            checkBox.setChecked(false);
+            viewHolder = (ViewHolder)view.getTag();
         }
 
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        viewHolder.checkBox.setOnCheckedChangeListener(null);
+
+
+        viewHolder.checkBox.setOnCheckedChangeListener(null);
+
+        viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                description = list.get(position).getDescription();
-                Toast.makeText(context, "description checked: " + description, Toast.LENGTH_LONG).show();
+                int getPosition = (Integer) buttonView.getTag();
+                description = list.get(getPosition).getDescription();
                 final String checkBoxStatus;
                 if(isChecked) {
                     checkBoxStatus = "1";
                 } else {
                     checkBoxStatus = "0";
                 }
+                list.get(getPosition).setStatus(checkBoxStatus);
                 new Thread() {
                     @Override
                     public void run() {
@@ -118,6 +114,61 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 }.start();
             }
         });
+        viewHolder.checkBox.setTag(position);
+        String isChecked = list.get(position).getStatus();
+        if (isChecked.equals("1")) {
+            viewHolder.checkBox.setChecked(true);
+        } else {
+            viewHolder.checkBox.setChecked(false);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         ImageButton deleteBtn = view.findViewById(R.id.imageButton_Delete);
@@ -132,15 +183,15 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        description = tvDescription.getText().toString();
+                        description = list.get(position).getDescription();
                         new Thread() {
                             @Override
                             public void run() {
                                 taskDatabase.taskDao().delete(taskDatabase.taskDao().get1Task(description));
                                 list.remove(position);
-//                                Toast.makeText(context, "removed: " + description, Toast.LENGTH_SHORT).show();
                             }
                         }.start();
+//                        Toast.makeText(context, "removed: " + description, Toast.LENGTH_SHORT).show();
                         notifyDataSetChanged();
                     }
                 });
@@ -154,6 +205,7 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 alert.show();
             }
         });
+
 
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,9 +246,11 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                         new Thread() {
                             @Override
                             public void run() {
+                                description = list.get(position).getDescription();
+                                status = list.get(position).getStatus();
                                 newDescription = editText.getText().toString();
                                 taskDatabase.taskDao().update(description, newDescription, fullFormattedNewTime);
-                                list.set(position, new Task(newDescription, fullFormattedNewTime,"0"));
+                                list.set(position, new Task(newDescription, fullFormattedNewTime, "0"));
                             }
                         }.start();
                         Toast.makeText(context, "Edited", Toast.LENGTH_LONG).show();
@@ -215,9 +269,13 @@ public class TaskAdapter extends BaseAdapter implements ListAdapter {
                 timePickerDialog.show();
             }
         });
-
-        this.position = position;
-        description = tvDescription.getText().toString();
+        tag++;
         return view;
+    }
+
+    private class ViewHolder {
+        private TextView description;
+        private TextView time;
+        private CheckBox checkBox;
     }
 }

@@ -6,9 +6,9 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,12 +21,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 
 import static com.example.huy.myfirstapp.CalendarActivity.CHOSEN_DATE;
 
 public class DailyActivity extends AppCompatActivity {
-    private TextView theDate;
+    private TextView tvDaily;
     private ListView dailyListView;
     String description;
     String time;
@@ -35,39 +37,44 @@ public class DailyActivity extends AppCompatActivity {
     String selectedHourMinute;
     String fullFormattedNewTime;
     String newDescription;
-    ArrayList<Task> taskArrayList = new ArrayList<>();
+    private TaskDatabase taskDatabase;
+    List<Task> taskList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily);
 
         dailyListView = findViewById(R.id.listView_Daily);
 
+        taskDatabase = TaskDatabase.getDatabaseInstance(this);
         Intent getDateIntent = getIntent();
         String date = getDateIntent.getStringExtra("date");
-        theDate = findViewById(R.id.text_thedate);
-//        getData();
-
+        tvDaily = findViewById(R.id.text_thedate);
+        tvDaily.setText(date);
+        getData();
+        super.onCreate(savedInstanceState);
     }
 
-    /*public void getData() {
-        Cursor cursor = dbManager.dailyFetch();
-        if (cursor.moveToFirst()) {
-            do {
-                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-                String shortTime = time.substring(11);
-                taskArrayList.add(new Task(description, shortTime, status));
+    public void getData() {
+        Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                String timeForQuery = "%" + CHOSEN_DATE + "%";
+                taskList = taskDatabase.taskDao().loadAllByTime(timeForQuery);
+                Log.e("time string: ", timeForQuery);
+                Log.e("taskList size", "" + (taskList.size()));
+                for (Task task : taskList) {
+                    description = task.getDescription();
+                    time = task.getAppointedTime();
+                    status = task.getStatus();
+                    adapter = new TaskAdapter(taskList, DailyActivity.this);
+                    dailyListView.setAdapter(adapter);
+                    dailyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+                }
             }
-            while (cursor.moveToNext());
-            adapter = new TaskAdapter(taskArrayList, DailyActivity.this);
-            dailyListView.setAdapter(adapter);
-            dailyListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        }
+        });
     }
-*/
+
     public void addTaskDaily(View view) {
         Calendar rightNow = Calendar.getInstance();
         int currentHourIn24Format = rightNow.get(Calendar.HOUR_OF_DAY);
@@ -78,7 +85,6 @@ public class DailyActivity extends AppCompatActivity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay,
                                           int minute) {
-
                         selectedHourMinute = hourOfDay + ":" + minute;
                         fullFormattedNewTime = CHOSEN_DATE + "T" + selectedHourMinute;
                         getDescription();
@@ -99,8 +105,15 @@ public class DailyActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 newDescription = editText.getText().toString();
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        taskDatabase.taskDao().insert(new Task(newDescription, fullFormattedNewTime, "0"));
+                        taskList.add(new Task(newDescription, fullFormattedNewTime, "0"));
+                    }
+                });
                 Toast.makeText(DailyActivity.this, "Added", Toast.LENGTH_LONG).show();
-                notifyListAfterAdding();
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -117,41 +130,36 @@ public class DailyActivity extends AppCompatActivity {
         return true;
     }
 
-    public void notifyListAfterAdding() {
-        taskArrayList.add(new Task(newDescription, selectedHourMinute, status));
-//        adapter.notifyDataSetChanged();
-    }
 
     @Override
     protected void onStop() {
-/*        Cursor cursor = dbManager.dailyFetch();
-        if (cursor.moveToFirst()) {
-            int requestCode = 0;
-            do {
-                description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
-                time = cursor.getString(cursor.getColumnIndex(COLUMN_TIME));
-                status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-                if (status.equals("0")) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-                    Date date = null;
-                    try {
-                        date = simpleDateFormat.parse(time);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    long milis = date.getTime();
-                    AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-                    Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
-                    sendAlarmService.putExtra("time", time);
-                    sendAlarmService.putExtra("description", description);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
-                    requestCode++;
-                    if (milis > System.currentTimeMillis()) {
-                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
-                    }
+        int requestCode = 0;
+        for (Task task : taskList) {
+            description = task.getDescription();
+            time = task.getAppointedTime();
+            status = task.getStatus();
+
+            if (status.equals("0")) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                Date date = null;
+                try {
+                    date = simpleDateFormat.parse(time);
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-            } while (cursor.moveToNext());
-        }*/
+
+                long milis = date.getTime();
+                AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+                Intent sendAlarmService = new Intent(this, AlarmReceiver.class);
+                sendAlarmService.putExtra("time", time);
+                sendAlarmService.putExtra("description", description);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, sendAlarmService, PendingIntent.FLAG_UPDATE_CURRENT);
+                requestCode++;
+                if (milis > System.currentTimeMillis()) {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, milis, pendingIntent);
+                }
+            }
+        }
         super.onStop();
     }
 }
